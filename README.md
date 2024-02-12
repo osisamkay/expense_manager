@@ -1,7 +1,3 @@
-Below is a README file for the Expense Management App. It provides an overview of the project, instructions for installation, usage, contributing, and licensing:
-
----
-
 # Expense Management App
 
 The Expense Management App is a Flask web application designed to help users track their expenses. It allows users to add, edit, and delete expenses, as well as view their total expenses and breakdown by category.
