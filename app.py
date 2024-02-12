@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request, redirect, jsonify, flash, url_for
+from flask import Flask, render_template, request, redirect, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import os
 
+# Define the project directory and database file path
 project_dir = os.path.dirname(os.path.abspath(__file__))
 database_file = "sqlite:///{}".format(
     os.path.join(project_dir, 'expensedatabase.db'))
@@ -13,8 +14,9 @@ db = SQLAlchemy(app)
 
 
 class Expense(db.Model):
+    """Expense class represents an expense entity in the database."""
     id = db.Column(db.Integer, primary_key=True)
-    amount = db.Column(db.Float)  # Adjusted data type to float for amount
+    amount = db.Column(db.Float)
     expense_date = db.Column(db.String(50), nullable=False)
     category = db.Column(db.String(50), nullable=False)
     expense_name = db.Column(db.String(50), nullable=False)
@@ -22,6 +24,7 @@ class Expense(db.Model):
 
 @app.route('/')
 def get_all_expenses():
+    """Retrieve all expenses from the database and display them."""
     expenses = Expense.query.all()
     all_total_expenses = []
 
@@ -43,35 +46,34 @@ def get_all_expenses():
 
 @app.route('/add_expenses')
 def add():
+    """Render the form to add a new expense."""
     return render_template("add.html")
 
 
 @app.route('/add_expenses', methods=['POST'])
 def add_expenses():
+    """Add a new expense to the database."""
     try:
-        # Retrieve form data
         expense_name = request.form.get("expense_name")
         expense_date = request.form.get("expense_date")
         amount = request.form.get("amount")
         category = request.form.get("category")
 
-        # Create a new Expense object
         new_expense = Expense(expense_name=expense_name,
                               expense_date=expense_date, amount=amount, category=category)
 
-        # Add new_expense to the session and commit to the database
         db.session.add(new_expense)
         db.session.commit()
 
-        return redirect('/')  # Redirect to the home page after adding expense
+        return redirect('/')
     except Exception as e:
         return f"An error occurred: {str(e)}", 500
 
 
 @app.route('/expense/edit/<int:id>', methods=['POST', 'GET'])
 def edit_expense(id):
+    """Edit an existing expense."""
     try:
-        # Fetch the expense by its ID
         expense = Expense.query.get(id)
 
         if request.method == 'GET':
@@ -90,7 +92,6 @@ def edit_expense(id):
                 expense.category = request.form.get(
                     'category', expense.category)
 
-                # Commit changes to the database
                 db.session.commit()
                 flash('Expense updated successfully', 'success')
 
@@ -104,23 +105,19 @@ def edit_expense(id):
 
 @app.route('/expense/delete/<int:id>')
 def delete_expense(id):
-    # Fetch the expense by its ID
+    """Delete an expense from the database."""
     expense = Expense.query.get(id)
 
-    # Check if the expense exists
     if expense:
-        # Delete the expense from the database
         db.session.delete(expense)
         db.session.commit()
-        flash('Expense updated successfully', 'success')
+        flash('Expense deleted successfully', 'success')
         return redirect('/')
-
     else:
         return jsonify({'message': 'Expense not found'}), 404
 
 
 if __name__ == '__main__':
     with app.app_context():
-        # Create database tables before running the app
         db.create_all()
     app.run(host='127.0.0.1', port=8088, debug=True)
