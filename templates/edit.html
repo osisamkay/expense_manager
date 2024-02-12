@@ -1,0 +1,31 @@
+{% extends 'base.html' %} 
+
+{% block body %}
+<form action="/expense/edit/{{ expenses.id }}" method="POST" class="max-w-sm mx-auto mt-8">
+    <div class="text-lg">Edit {{ expenses.expense_name }}</div>
+    <div class="mb-4 flex flex-col">
+        <label for="expense_date" class="block text-sm font-medium text-gray-700">Expense date</label>
+        <input type="date" name="expense_date" value="{{ expenses.expense_date }}" id="expense_date" class="mt-1 p-2 border rounded-md w-full" />
+    </div>
+    <div class="mb-4 flex flex-col">
+        <label for="expense_name" class="block text-sm font-medium text-gray-700">Expense name</label>
+        <input type="text" name="expense_name" id="expense_name" value="{{ expenses.expense_name }}" class="mt-1 p-2 border rounded-md w-full" />
+    </div>
+    <div class="mb-4 flex flex-col">
+        <label for="amount" class="block text-sm font-medium text-gray-700">Amount</label>
+        <input type="number" name="amount" id="amount" value="{{ expenses.amount }}" class="mt-1 p-2 border rounded-md w-full" />
+    </div>
+    <div class="mb-4 flex flex-col">
+        <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
+        <select name="category" id="category" class="mt-1 p-2 border rounded-md w-full">
+            <option value="food" {% if expenses.category == 'food' %} selected {% endif %}>Food</option>
+            <option value="entertainment" {% if expenses.category == 'entertainment' %} selected {% endif %}>Entertainment</option>
+            <option value="business" {% if expenses.category == 'business' %} selected {% endif %}>Business</option>
+        </select>
+    </div>
+    <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+        Submit
+    </button>
+
+</form>
+{% endblock %}

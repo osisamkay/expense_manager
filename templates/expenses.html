@@ -1,0 +1,148 @@
+{% extends "base.html" %} {% block extra_css %}
+<style>
+  .expense-chart-container {
+    max-width: 400px;
+    height: 300px;
+  }
+</style>
+{% endblock %} {% block body %}
+<div class="container mx-auto p-4">
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold text-gray-800">Expenses</h1>
+    <a href="/add_expenses" class="text-white">
+      <button
+        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out"
+      >
+        Add Expense
+      </button>
+    </a>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="w-full table-auto border-collapse border border-gray-300">
+      <thead>
+        <tr class="bg-gray-100">
+          <th
+            class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase border border-gray-300"
+          >
+            Expense Name
+          </th>
+          <th
+            class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase border border-gray-300"
+          >
+            Amount
+          </th>
+          <th
+            class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase border border-gray-300"
+          >
+            Category
+          </th>
+          <th
+            class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase border border-gray-300"
+          >
+            Expense Date
+          </th>
+          <th
+            class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase border border-gray-300"
+          >
+            Actions
+          </th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200">
+        {% for expense in expenses %}
+        <tr>
+          <td class="px-6 py-4 whitespace-nowrap border border-gray-300">
+            {{ expense.expense_name }}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap border border-gray-300">
+            {{ expense.amount }}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap border border-gray-300">
+            {{ expense.category }}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap border border-gray-300">
+            {{ expense.expense_date }}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap border border-gray-300">
+            <a
+              href="/expense/edit/{{ expense.id }}"
+              class="text-blue-500 hover:text-blue-700 mr-2"
+              >Edit</a
+            >
+            <a
+              href="/expense/delete/{{ expense.id }}"
+              class="text-red-500 hover:text-red-700"
+            >
+              Delete
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="mt-8 grid grid-cols-2 gap-8">
+    <div class="max-w-lg bg-white rounded-lg shadow-md p-6">
+      <h2 class="text-2xl font-bold mb-4 text-gray-800">Expense Breakdown</h2>
+      <ul>
+        {% for expense in all_total_expenses %} {% for category, amount in
+        expense.items() %}
+        <li class="flex justify-between py-2">
+          <span class="font-semibold text-gray-700">{{ category }}</span>
+          <span class="text-gray-900">{{ amount }}</span>
+        </li>
+        {% endfor %} {% endfor %}
+      </ul>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <h2 class="text-2xl font-bold mb-4 text-gray-800">
+        Expense Breakdown Chart
+      </h2>
+      <div class="expense-chart-container">
+        <canvas id="expenseChart" width="400" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var ctx = document.getElementById('expenseChart').getContext('2d');
+    var data = {
+      labels: [],
+      datasets: [{
+        label: 'Expense Amount',
+        backgroundColor: [], // Different colors for each segment
+        borderWidth: 1,
+        data: []
+      }]
+    };
+
+    {% for expense in all_total_expenses %}
+      {% for category, amount in expense.items() %}
+        {% if category != "All Expenses" %}
+          data.labels.push("{{ category }}");
+          data.datasets[0].data.push("{{ amount }}");
+          // Generate random color for each segment
+          var randomColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+          data.datasets[0].backgroundColor.push(randomColor);
+        {% endif %}
+      {% endfor %}
+    {% endfor %}
+
+    new Chart(ctx, {
+      type: 'bar',
+      data: data,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        legend: {
+          position: 'bottom',
+        },
+      }
+    });
+  });
+</script>
+{% endblock %}
